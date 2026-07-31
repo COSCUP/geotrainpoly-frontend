@@ -31,3 +31,13 @@ export async function get_booths_images() {
     }, {})
     return boothsImages
 }
+
+export async function get_booth_info(room: string) {
+    const res = await fetch(`${API_BASE_URL}/booths/${room}`)
+
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+    const data = await res.json()
+
+
+    return data
+}
