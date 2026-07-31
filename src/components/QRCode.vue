@@ -12,7 +12,15 @@ const token = computed(() => route.query.token)
 const showMyQrCode = ref(true)
 
 const onDetect = (decodedText: string) => {
-  const boothToken = decodedText[0].rawValue
+  let boothToken: string;
+  const payload = decodedText[0].rawValue
+  
+  if (payload.startsWith('http')) {
+    boothToken = payload.split('room=')[1]
+  } else {
+    boothToken = payload
+  }
+
   EventBus.emit('add-new-hextile', boothToken)
   router.push({ path: '/', query: { token: token.value } })
 }
