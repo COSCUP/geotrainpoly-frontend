@@ -1,110 +1,45 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Icon } from '@iconify/vue'
-import { achievements as allAchievements } from '../data/AchievementsData'
-import type { Medal } from '../data/AchievementsData'
 import { getUserProfile } from '../api/get_profiles'
-import { putProfile } from '../api/put_profiles'
 
 type PlayerProfile = {
   avatar: string
   nickname: string
-  title: string
   points: number
-  achievements: Medal[]
 }
 
-// 頭像與對應的人類小啄
 const avatarMap = {
   '/assets/人類小啄頭像1.png': '/assets/人類小啄1.png',
   '/assets/人類小啄頭像2.png': '/assets/人類小啄2.png',
   '/assets/人類小啄頭像3.png': '/assets/人類小啄3.png'
 }
-
-// 頭像選項 (只保留頭像圖片，用於選單顯示)
 const avatarList = Object.keys(avatarMap)
-
-// 玩家資料
 const player = ref<PlayerProfile>({
   avatar: avatarList[0],
   nickname: '',
-  title: '',
-  points: 0,
-  achievements: []
-})
-
-// 成就對應的稱號
-const availableTitles = computed(() => {
-  return [
-    { id: 0, label: '新手小啄', icon: '' },
-    ...player.value.achievements
-      .filter(a => a.unlocked)
-      .map(a => ({ id: a.id, label: a.name, icon: a.icon }))
-  ]
+  points: 0
 })
 
 onMounted(async () => {
-  document.addEventListener('click', closeDropdownOnClickOutside)
-
-  const savedAvatar = localStorage.getItem('playerAvatar');
+  const savedAvatar = localStorage.getItem('playerAvatar')
   if (savedAvatar) {
-    player.value.avatar = savedAvatar;
+    player.value.avatar = savedAvatar
   } else {
-    player.value.avatar = avatarList[0];
+    player.value.avatar = avatarList[0]
   }
 
   try {
     const user = await getUserProfile()
-    console.log('User profile from API:', user)
-
     if (user) {
       player.value.nickname = user.name
       player.value.points = user.points
-      player.value.title = user.title
-
-      const unlockedNames = user.achievements.map((a: any) => a.name)
-      player.value.achievements = allAchievements.map(m => ({
-        ...m,
-        unlocked: unlockedNames.includes(m.name)
-      }))
     }
   } catch (err) {
     console.error('Failed to load user profile:', err)
   }
 })
 
-onUnmounted(() => {
-  document.removeEventListener('click', closeDropdownOnClickOutside)
-})
-
-const showTitleDropdown = ref(false)
-const toggleTitleDropdown = () => {
-  showTitleDropdown.value = !showTitleDropdown.value
-}
-const selectTitle = async (label: string) => {
-  if (player.value.title === label) {
-    showTitleDropdown.value = false;
-    return;
-  }
-
-  try {
-    const response = await putProfile({ title: label });
-    console.log('Update title API response:', response);
-    player.value.title = label;
-  } catch (error) {
-    console.error('Failed to update title:', error);
-  }
-
-  showTitleDropdown.value = false;
-}
-const closeDropdownOnClickOutside = (event: MouseEvent) => {
-  const titleEl = document.querySelector('.title-container')
-  if (titleEl && !titleEl.contains(event.target as Node)) {
-    showTitleDropdown.value = false
-  }
-}
-
-// 選擇頭像
 const showAvatarModal = ref(false)
 const selectedAvatar = ref<string | null>(null)
 
@@ -118,11 +53,11 @@ const selectAvatar = (path: string) => {
 const confirmAvatar = () => {
   if (selectedAvatar.value) {
     player.value.avatar = selectedAvatar.value
-    localStorage.setItem('playerAvatar', selectedAvatar.value);
+    localStorage.setItem('playerAvatar', selectedAvatar.value)
 
-    const characterPath = (avatarMap as Record<string, string>)[selectedAvatar.value];
+    const characterPath = (avatarMap as Record<string, string>)[selectedAvatar.value]
     if (characterPath) {
-      localStorage.setItem('playerCharacter', characterPath);
+      localStorage.setItem('playerCharacter', characterPath)
     }
   }
   closeAvatarModal()
@@ -145,42 +80,10 @@ const closeAvatarModal = () => {
     </div>
 
     <div class="info-section">
-       <div class="display-score">{{ player.points }} 分</div>
+      <div class="display-score">{{ player.points }} 分</div>
       <div class="nickname-container">
         <span class="display-nickname">{{ player.nickname }}</span>
       </div>
-
-      <div class="title-container">
-        <div class="current-title" @click="toggleTitleDropdown">
-          {{ player.title || '新手小啄' }}
-        </div>
-
-        <transition name="fade-slide-down">
-          <div v-if="showTitleDropdown" class="title-dropdown-list">
-            <div
-              v-for="title in availableTitles"
-              :key="title.id"
-              class="title-dropdown-item"
-              :class="{ 'selected-title': player.title === title.label }"
-              @click="selectTitle(title.label)"
-            >
-              {{ title.label }}
-            </div>
-          </div>
-        </transition>
-      </div>
-    </div>
-
-    <div class="scrollable-content">
-        <div class="achievements-section">
-          <h3>成就</h3>
-          <div class="achievements-grid">
-            <div v-for="medal in player.achievements" :key="medal.id" class="medal-item">
-              <Icon :icon="medal.icon" class="medal-icon" :style="{ color: medal.unlocked ? '#F8C0C8' : '#888' }" />
-              <span class="medal-label">{{ medal.unlocked ? medal.name : '？？？' }}</span>
-            </div>
-          </div>
-        </div>
     </div>
 
     <div v-if="showAvatarModal" class="avatar-modal-overlay" @click.self="closeAvatarModal">
@@ -308,161 +211,9 @@ const closeAvatarModal = () => {
 
 .display-nickname {
   font-size: 20px;
-  font-family:'M PLUS Rounded 1c',sans-serif;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
   font-weight: bold;
   color: #333;
-}
-
-.title-container {
-  background-color: #e6eef4;
-  border-radius: 25px;
-  padding: 10px 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.title-container::after {
-  content: '▼';
-  position: absolute;
-  right: 15px;
-  color: #888;
-  font-size: 12px;
-  pointer-events: none;
-}
-
-.current-title {
-  flex-grow: 1;
-  text-align: center;
-  font-size: 16px;
-  font-family: 'Zen Maru Gothic', sans-serif;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.title-dropdown-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  margin-top: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 50;
-  border: 1px solid #e0e6ec;
-  padding: 5px 0;
-}
-
-.title-dropdown-item {
-  padding: 10px 15px;
-  font-size: 16px;
-  font-family: 'Zen Maru Gothic', sans-serif;
-  color: #333;
-  cursor: pointer;
-  text-align: center;
-  transition: background-color 0.2s ease, color 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
-
-.title-dropdown-item:hover {
-  background-color: #f0f5f9;
-}
-
-
-.title-dropdown-item:active {
-  background-color: #e6eef4;
-}
-
-.title-dropdown-item.selected-title {
-  font-weight: bold;
-  color: #007bff;
-}
-
-.fade-slide-down-enter-active,
-.fade-slide-down-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-slide-down-enter-from,
-.fade-slide-down-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
-.scrollable-content {
-  flex-grow: 1;
-  overflow-y: auto;
-  width: 100%;
-  padding-right: 5px;
-  box-sizing: border-box;
-}
-
-.achievements-section {
-  padding: 0;
-  box-sizing: border-box;
-  text-align: center;
-  position: relative;
-  margin-top: 0;
-  box-shadow: none;
-}
-
-.achievements-section h3 {
-  font-size: 20px;
-  font-family: 'Zen Maru Gothic', sans-serif;
-  font-weight: bold;
-  color: #4A4A4A;
-  margin-top: 0;
-  margin-bottom: 15px;
-  letter-spacing: 2px;
-}
-
-.achievements-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  justify-items: center;
-  margin-bottom: 70px;
-}
-
-.medal-item {
-  width: 80px;
-  height: 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
-.medal-icon {
-  font-size: 48px;
-}
-
-.medal-label {
-  font-size: 12px;
-  font-family: 'Zen Maru Gothic', sans-serif;
-  color: #555;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-input:focus {
-  outline: none;
 }
 
 .avatar-modal-overlay {
