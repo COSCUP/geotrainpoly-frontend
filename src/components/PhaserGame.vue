@@ -5,8 +5,6 @@ import { marked } from 'marked'
 import { EventBus } from '../game/EventBus'
 import { GameData } from '../data/GameData.ts'
 import StartGame from '../game/main'
-// import { Icon } from '@iconify/vue'
-// import Danmaku from './Danmaku.vue'
 import { get_hextiles_booth } from '../api/get_hextiles.ts'
 import { post_msg } from '../api/post_msg.ts'
 import Tutorial from './Tutorial.vue'
@@ -36,7 +34,6 @@ onMounted(async () => {
 
   EventBus.on('current-scene-ready', (sceneInstance: Phaser.Scene) => {
     emit('current-active-scene', sceneInstance)
-
     scene.value = sceneInstance
   })
 
@@ -107,35 +104,9 @@ function markedIntro(intro: string) {
   return res.value
 }
 
-// const topComments = computed(() => {
-//   if (!Array.isArray(comments.value)) {
-//     return []
-//   }
-//   return comments.value
-//     .slice()
-//     .sort((a: any, b: any) => b.likes - a.likes)
-//     .slice(0, Math.min(comments.value.length, 3))
-// })
-
 const isButtonDisabled = computed(() => {
   return newMessage.value.trim() === ''
 })
-
-// function toggleLike(id: number) {
-//   const index = comments.value.findIndex((c: any) => c.id === id)
-//   if (comments.value[index].isLiked) {
-//     comments.value[index].isLiked = false
-//     comments.value[index].likes--
-//   } else {
-//     comments.value[index].isLiked = true
-//     comments.value[index].likes++
-
-//     comments.value[index].animate = true
-//     setTimeout(() => {
-//       comments.value[index].animate = false
-//     }, 300)
-//   }
-// }
 
 watch([showPopup, popupData], async ([isOpen, data]) => {
   if (isOpen && data.booth.type === 'ROOMS') {
@@ -176,29 +147,13 @@ watch([showPopup, popupData], async ([isOpen, data]) => {
       <div v-else-if="popupData.booth.type === 'ROOMS'" class="Venue">
         <h2>{{ popupData.booth.name }}</h2>
         <div class="comment-list">
-          <div v-for="comment in comments" :key="comment.msg_id" class="comment-item">
-            <div class="comment-content">
-              <div class="comment-header">
-                <span class="comment-user">{{ comment.user.name + "．" + (comment.user.title || "新手小啄") }}</span>
-                <span class="comment-time">{{ formatTime(comment.created_at) }}</span>
-              </div>
-              <p class="comment-message">{{ comment.content }}</p>
-            </div>
-            <!-- <div class="comment-likes">
-              <Icon v-if="comment.isLiked" icon="mdi:heart" width="24" height="24"  style="color: #f00" @click="toggleLike(comment.id)" :class="{ 'like-icon': true, 'animate': comment.animate }" />
-              <Icon v-else icon="mdi:heart-outline" width="24" height="24" @click="toggleLike(comment.id)" :class="{ 'like-icon': true, 'animate': comment.animate }" />
-              <p> {{ comment.likes }} </p>
-            </div> -->
-          </div>
         </div>
         <div class="comment-form">
-          <textarea v-model="newMessage" rows="3" placeholder="寫下你的留言...（上限 200 個字）" maxlength="200"></textarea>
           <button @click="addComment(popupData.booth.name, popupData.booth.booth_id)" :disabled="isButtonDisabled">送出留言</button>
         </div>
       </div>
     </div>
   </div>
-  <!-- <Danmaku :comments="topComments" v-if="showPopup && popupData.booth.type === 'ROOMS'"/> -->
 </template>
 
 <style scoped>
@@ -288,34 +243,6 @@ img {
 
 .comment-content {
   flex: 17;
-}
-
-.comment-likes {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.comment-likes p {
-  margin: 8px 0 0 0;
-  text-align: center;
-}
-
-@keyframes like-bounce {
-  0% {
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    transform: scale(1.3) rotate(-15deg);
-  }
-  100% {
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.like-icon.animate {
-  animation: like-bounce 0.3s ease;
 }
 
 .comment-item {
@@ -412,6 +339,5 @@ img {
   font-size: 1em;
   gap: 5px;
   -webkit-tap-highlight-color: transparent;
-  
 }
 </style>
