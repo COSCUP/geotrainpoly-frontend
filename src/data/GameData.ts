@@ -9,6 +9,7 @@ export const GameData = {
   bottomBarHeight: 70,
   popupOpen: false,
   apiBaseUrl: 'https://geotrainpoly.coscup.org/api',
+  COSCUPBaseUrl: 'https://coscup.org/2026',
   get apiToken() {
     const urlParams = new URLSearchParams(window.location.search)
     return urlParams.get('token')
