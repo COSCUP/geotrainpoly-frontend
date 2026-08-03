@@ -6,7 +6,6 @@ import { EventBus } from '../game/EventBus'
 import { GameData } from '../data/GameData.ts'
 import StartGame from '../game/main'
 import { get_hextiles_booth } from '../api/get_hextiles.ts'
-import { post_msg } from '../api/post_msg.ts'
 import Tutorial from './Tutorial.vue'
 import { useRoute } from 'vue-router'
 

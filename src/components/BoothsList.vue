@@ -7,7 +7,7 @@ import { get_booths } from '../api/get_booths'
 const boothsData = ref([])
 const activeID = ref<number | null>(null)
 const renderer = new marked.Renderer()
-renderer.link = function ({href, title, text}) {
+renderer.link = function ({href, text}) {
   return `<a href="${href}" target="_blank">${text}</a>`
 }
 marked.setOptions({ renderer })
@@ -36,9 +36,13 @@ function markedIntro(intro: string) {
         @click="toggleBooths(id)"
       >
         <div class="booths-header">
-          <img 
-            :src=booths.logo
-            :alt="booths.name" class="booths-logo" />
+          <div class="logo-container">
+            <img 
+              :src=booths.logo
+              :alt="booths.name"
+              class="booths-logo" 
+            />
+          </div>
           <span class="booths-name">{{ booths.name }}</span>
         </div>
         <transition name="fade-slide">
@@ -92,8 +96,21 @@ function markedIntro(intro: string) {
   gap: 12px;
 }
 
+.logo-container {
+  width: 80px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .booths-logo {
-  width: 100px;
+  width: auto; 
+  height: auto; 
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 
 .booths-name {
