@@ -214,7 +214,7 @@ img {
   flex: 1;
   min-width: 100px;
   padding: 10px 16px;
-  background-color: rgb(196, 138, 221);
+  background-color: #c48add;
   color: white;
   font-weight: bold;
   text-decoration: none;
