@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type Phaser from 'phaser'
-import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
+import { onMounted, onUnmounted, ref, computed } from 'vue'
 import { marked } from 'marked'
 import { EventBus } from '../game/EventBus'
 import { GameData } from '../data/GameData.ts'
@@ -15,13 +15,17 @@ const scene = ref()
 const game = ref()
 const showPopup = ref(false)
 const popupData = ref()
-const comments = ref()
-const newMessage = ref('')
 const renderer = new marked.Renderer()
 const tutorialRef = ref()
 const route = useRoute()
 const token = computed(() => route.query.token)
-renderer.link = function ({href, title, text}) {
+const linkButtons = ref([
+  { label: '連結一', url: 'https://coscup-tw.kktix.cc/events/preregist' },
+  { label: '連結二', url: 'https://coscup-tw.kktix.cc/events/preregist' },
+  { label: '連結三', url: 'https://coscup-tw.kktix.cc/events/preregist' }
+])
+
+renderer.link = function ({href, text}) {
   return `<a href="${href}" target="_blank">${text}</a>`
 }
 marked.setOptions({ renderer })
@@ -66,63 +70,18 @@ defineExpose({ scene, game })
 function closePopup() {
   showPopup.value = false
   GameData.popupOpen = false
-  comments.value = []
-}
-
-function formatTime(iso: string, timeZone: string = 'Asia/Taipei') {
-  const date = new Date(iso + 'Z')
-  const formatter = new Intl.DateTimeFormat('zh-TW', {
-    timeZone,
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    hourCycle: 'h23',
-  })
-  return formatter.format(date)
-}
-
-async function addComment(booth_name: string, booth_id: string) {
-  try {
-    await post_msg(booth_id, newMessage.value)
-    newMessage.value = ''
-
-    const data = await get_hextiles_booth(booth_name)
-    if (data && data.msg) {
-      comments.value = data.msg
-    } else {
-      console.warn('No messages found in response:', data)
-    }
-  } catch (error) {
-    console.error('Error posting message or fetching comments:', error)
-  }
 }
 
 function markedIntro(intro: string) {
   const res = computed(() => marked(intro))
   return res.value
 }
-
-const isButtonDisabled = computed(() => {
-  return newMessage.value.trim() === ''
-})
-
-watch([showPopup, popupData], async ([isOpen, data]) => {
-  if (isOpen && data.booth.type === 'ROOMS') {
-    const booth_data = await get_hextiles_booth(data.booth.name)
-    if (booth_data && booth_data.msg) {
-      comments.value = data.msg
-    } else {
-      console.warn('No messages found in response:', data)
-    }
-  }
-})
 </script>
 
 <template>
   <div v-if="!token" class="no-token-message">
-      <p>尚未登入，請先填寫參與者大調查</p>
-      <a href="https://coscup.org/2025-survey/" target="_blank" class="survey-button">點此前往問卷</a>
+      <p>請先去推倒售票亭！</p>
+      <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">點此前往</a>
   </div>
   <Tutorial ref="tutorialRef" v-if="scene" :scene="scene" />
   <div id="game-container" :style="{ bottom: `${GameData.bottomBarHeight}px` }" />
@@ -145,10 +104,17 @@ watch([showPopup, popupData], async ([isOpen, data]) => {
       </div>
       <div v-else-if="popupData.booth.type === 'ROOMS'" class="Venue">
         <h2>{{ popupData.booth.name }}</h2>
-        <div class="comment-list">
-        </div>
-        <div class="comment-form">
-          <button @click="addComment(popupData.booth.name, popupData.booth.booth_id)" :disabled="isButtonDisabled">送出留言</button>
+        <div class="action-form">
+          <a
+            v-for="(btn, index) in linkButtons"
+            :key="index"
+            :href="btn.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="action-btn"
+          >
+            {{ btn.label }}
+          </a>
         </div>
       </div>
     </div>
@@ -235,68 +201,32 @@ img {
   overflow-y: auto;
 }
 
-.comment-list {
-  max-height: 60vh;
-  overflow-y: auto;
-}
-
-.comment-content {
-  flex: 17;
-}
-
-.comment-item {
-  border-bottom: 1px solid black;
-  padding: 12px 8px;
+.action-form {
   display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: center;
+  gap: 12px;
   align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
 }
 
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  font-size: 14px;
-  margin-bottom: 4px;
-  color: #333;
-}
-
-.comment-user {
-  font-weight: bold;
-  text-align: left;
-}
-
-.comment-message {
-  margin: 0;
-  text-align: left;
-}
-
-.comment-form {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.comment-form textarea {
-  margin-top: 12px;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.comment-form button {
-  align-self: flex-end;
-  padding: 8px 16px;
-  background-color: rgb(182, 105, 214);
+.action-btn {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 16px;
+  background-color: rgb(196, 138, 221);
   color: white;
   font-weight: bold;
-  border: none;
+  text-decoration: none;
   border-radius: 6px;
+  text-align: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  display: inline-block;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.comment-form button:disabled {
-  background-color: #aaa;
+.action-btn:active {
+  transform: scale(0.98);
 }
 
 .no-token-message {
@@ -319,7 +249,7 @@ img {
 }
 
 .no-token-message a {
-  color: white;;
+  color: white;
   text-decoration: underline;
   font-size: 1.1em;
 }
