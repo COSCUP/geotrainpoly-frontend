@@ -8,6 +8,7 @@ import StartGame from '../game/main'
 import { get_hextiles_booth } from '../api/get_hextiles.ts'
 import Tutorial from './Tutorial.vue'
 import { useRoute } from 'vue-router'
+import SessionCard from './SessionCard.vue'
 
 const emit = defineEmits(['current-active-scene'])
 // Save the current scene instance
@@ -105,16 +106,7 @@ function markedIntro(intro: string) {
       <div v-else-if="popupData.booth.type === 'ROOMS'" class="Venue">
         <h2>{{ popupData.booth.name }}</h2>
         <div class="action-form">
-          <a
-            v-for="(btn, index) in linkButtons"
-            :key="index"
-            :href="btn.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="action-btn"
-          >
-            {{ btn.label }}
-          </a>
+          <SessionCard :session="popupData.session" />
         </div>
       </div>
     </div>
