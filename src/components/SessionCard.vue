@@ -2,12 +2,12 @@
 import { computed } from 'vue'
 
 const props = defineProps<{
-  boothData: any
-  fallbackName?: string
+  session: any
+  name?: string
 }>()
 
 const formattedTime = computed(() => {
-  const session = props.boothData?.session
+  const session = props.session
   if (!session?.start || !session?.end) return '暫無時間資訊'
 
   const startDate = new Date(session.start)
@@ -35,7 +35,7 @@ const formattedTime = computed(() => {
 })
 
 const actionButtons = computed(() => {
-  const session = props.boothData?.session
+  const session = props.session
   return [
     {
       label: '議程連結 (Official Website)',
@@ -63,19 +63,19 @@ const actionButtons = computed(() => {
 
 <template>
   <div class="session-card">
-    <div class="status-badge">
-      <strong>{{ boothData?.name || fallbackName }}</strong>
+    <div class="status-badge" v-if="name">
+      <strong>{{ name }}</strong>
     </div>
 
     <div class="title-section">
       <h1 class="session-title-zh">
-        {{ boothData?.session?.zh?.title }}
+        {{ session?.zh?.title }}
       </h1>
       <h2
-        v-if="boothData?.session?.en?.title && boothData?.session?.en?.title !== boothData?.session?.zh?.title"
+        v-if="session?.en?.title && session?.en?.title !== session?.zh?.title"
         class="session-title-en"
       >
-        {{ boothData?.session?.en?.title }}
+        {{ session?.en?.title }}
       </h2>
     </div>
 
@@ -98,17 +98,17 @@ const actionButtons = computed(() => {
           <small>Speaker</small>
         </div>
         <div class="info-value">
-          {{ boothData?.session?.speakers?.join(', ') }}
+          {{ session?.speakers?.join(', ') }}
         </div>
       </div>
 
-      <div class="info-row" v-if="boothData?.session?.language">
+      <div class="info-row" v-if="session?.language">
         <div class="info-label">
           <strong>語言</strong>
           <small>Language</small>
         </div>
         <div class="info-value">
-          {{ boothData?.session?.language }}
+          {{ session?.language }}
         </div>
       </div>
     </div>

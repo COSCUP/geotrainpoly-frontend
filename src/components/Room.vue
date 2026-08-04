@@ -40,7 +40,7 @@ onMounted(async () => {
 <template>
   <div class="room-page">
     <div class="room-content" v-if="!isLoading">
-      <SessionCard :boothData="boothData" :fallbackName="room as string" />
+      <SessionCard :session="boothData?.session" :name="boothData?.name || (room as string)" />
     </div>
 
     <div v-else class="loading-state">
