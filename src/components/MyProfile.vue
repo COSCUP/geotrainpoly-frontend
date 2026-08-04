@@ -3,15 +3,22 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { getUserProfile } from '../api/get_profiles'
+import { read_ad } from '../api/lottery'
 
 const router = useRouter()
 const route = useRoute()
+
+type CoffeeInfo = {
+  win: boolean | null
+  reward: boolean
+}
 
 type PlayerProfile = {
   avatar: string
   nickname: string
   points: number
   reward: boolean
+  coffee: CoffeeInfo | null
 }
 
 const avatarMap = {
@@ -24,7 +31,8 @@ const player = ref<PlayerProfile>({
   avatar: avatarList[0],
   nickname: '',
   points: 0,
-  reward: false
+  reward: false,
+  coffee: null
 })
 
 onMounted(async () => {
@@ -41,6 +49,7 @@ onMounted(async () => {
       player.value.nickname = user.name
       player.value.points = user.points
       player.value.reward = user.reward ?? false
+      player.value.coffee = user.coffee ?? null
     }
   } catch (err) {
     console.error('Failed to load user profile:', err)
@@ -75,6 +84,38 @@ const closeAvatarModal = () => {
 }
 
 const discountAmount = computed(() => player.value.points)
+
+const showAdModal = ref(false)
+const adClicked = ref(false)
+
+const LOTTERY_START = new Date('2026-08-04T09:00:00+08:00')
+const LOTTERY_END = new Date('2026-08-09T17:00:00+08:00')
+
+const lotteryStatus = computed(() => {
+  const now = new Date()
+  if (now < LOTTERY_START) return 'before'
+  if (now > LOTTERY_END) return 'after'
+  return 'active'
+})
+
+const goToLottery = () => {
+  showAdModal.value = true
+  adClicked.value = false
+}
+
+const onAdLinkClick = () => {
+  read_ad()
+  adClicked.value = true
+}
+
+const closeAdModal = () => {
+  showAdModal.value = false
+}
+
+const proceedToLottery = () => {
+  showAdModal.value = false
+  router.push({ path: '/lottery', query: { token: route.query.token } })
+}
 
 const goToQRCode = () => {
   router.push({ path: '/my-qrcode', query: { token: route.query.token } })
@@ -111,6 +152,53 @@ const goToQRCode = () => {
           <div class="coupon-desc-en">Souvenir Discount Coupon</div>
           <div v-if="player.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
         </div>
+      </div>
+      <div v-if="player.coffee?.win === true" class="coupon-card coupon-coffee" :class="{ 'coupon-redeemed': player.coffee.reward }" @click="goToQRCode">
+        <div class="coupon-left coupon-left-coffee">
+          <div class="coupon-discount">FREE</div>
+        </div>
+        <div class="coupon-right">
+          <div class="coupon-name">咖啡兌換卷</div>
+          <div class="coupon-desc-en">Coffee Redemption Coupon</div>
+          <div v-if="player.coffee.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
+        </div>
+      </div>
+      <div v-if="player.coffee === null && lotteryStatus === 'before'" class="lottery-cta" @click="goToLottery">
+        🎰 抽獎尚未開放 Lottery not yet available
+      </div>
+      <div v-if="player.coffee === null && lotteryStatus === 'active'" class="lottery-cta" @click="goToLottery">
+        🎰 點我抽咖啡卷！Try your luck for a free coffee!
+      </div>
+      <div v-if="player.coffee !== null && player.coffee.win === null && lotteryStatus === 'before'" class="lottery-cta" @click="goToLottery">
+        🎰 抽獎尚未開放 Lottery not yet available
+      </div>
+      <div v-if="player.coffee !== null && player.coffee.win === null && lotteryStatus === 'active'" class="lottery-cta" @click="goToLottery">
+        🎰 點我抽咖啡卷！Try your luck for a free coffee!
+      </div>
+      <div v-if="player.coffee !== null && player.coffee.win !== null" class="ad-banner" @click="goToLottery">
+        📢 Grafana & Friends Taipei — Join us!
+      </div>
+    </div>
+
+    <div v-if="showAdModal" class="avatar-modal-overlay" @click.self="closeAdModal">
+      <div class="avatar-modal-content ad-modal">
+        <button class="popup-close" @click="closeAdModal">x</button>
+        <h3>Grafana & Friends Taipei</h3>
+        <p class="ad-text">
+          This Grafana & Friends meetup group hosts events focused on open source monitoring and observability using Grafana and related technologies. Some meetups feature formal presentations, while others are more relaxed and discussion-driven. Every event is designed to encourage learning, connection, and community. Snacks and stickers included!
+        </p>
+        <a
+          href="https://www.meetup.com/grafana-friends-taipei/?src=event&camp=coscup-2026"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ad-link-btn"
+          @click="onAdLinkClick"
+        >
+          Join Meetup ↗
+        </a>
+        <div v-if="lotteryStatus === 'before'" class="lottery-not-open">抽獎尚未開放 Lottery not yet available</div>
+        <button v-else-if="player.coffee === null" class="modal-confirm-button" :class="{ 'btn-disabled': !adClicked }" :disabled="!adClicked" @click="proceedToLottery">開始抽獎 Start Lottery</button>
+        <button v-else-if="player.coffee?.win === null" class="modal-confirm-button" @click="proceedToLottery">開始抽獎 Start Lottery</button>
       </div>
     </div>
 
@@ -330,6 +418,83 @@ const goToQRCode = () => {
   background-color: #bbb;
 }
 
+.coupon-coffee {
+  margin-top: 10px;
+}
+
+.coupon-left-coffee {
+  background-color: #6B4226;
+}
+
+.ad-modal {
+  text-align: left;
+}
+
+.ad-text {
+  font-size: 14px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  color: #444;
+  line-height: 1.6;
+  margin: 12px 0 16px;
+}
+
+.ad-link-btn {
+  display: block;
+  text-align: center;
+  background-color: #F05A28;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 15px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.lottery-cta {
+  margin-top: 14px;
+  padding: 14px;
+  text-align: center;
+  font-size: 16px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #fff;
+  background: linear-gradient(135deg, #f7971e, #ffd200);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(247, 151, 30, 0.4);
+  animation: lottery-pulse 2s ease-in-out infinite;
+}
+
+.ad-banner {
+  margin-top: 14px;
+  padding: 12px;
+  text-align: center;
+  font-size: 14px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #5b2873;
+  background-color: #f4e8fb;
+  border: 2px solid #c48add;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.lottery-not-open {
+  text-align: center;
+  font-size: 14px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #999;
+  padding: 10px;
+}
+
+@keyframes lottery-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
 .coupon-redeemed-badge {
   font-size: 12px;
   font-family: 'Zen Maru Gothic', sans-serif;
@@ -416,7 +581,7 @@ const goToQRCode = () => {
 }
 
 .modal-confirm-button {
-  background-color: #F8C0C8;
+  background-color: #E8707E;
   color: white;
   border: none;
   padding: 10px 25px;
@@ -432,6 +597,12 @@ const goToQRCode = () => {
 
 .modal-confirm-button:active {
   background-color: #aaa;
+}
+
+.modal-confirm-button.btn-disabled {
+  background-color: #ccc;
+  color: #999;
+  cursor: not-allowed;
 }
 
 .popup-close {
