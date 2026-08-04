@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { getUserProfile } from '../api/get_profiles'
+
+const router = useRouter()
+const route = useRoute()
 
 type PlayerProfile = {
   avatar: string
   nickname: string
   points: number
+  reward: boolean
 }
 
 const avatarMap = {
@@ -18,7 +23,8 @@ const avatarList = Object.keys(avatarMap)
 const player = ref<PlayerProfile>({
   avatar: avatarList[0],
   nickname: '',
-  points: 0
+  points: 0,
+  reward: false
 })
 
 onMounted(async () => {
@@ -34,6 +40,7 @@ onMounted(async () => {
     if (user) {
       player.value.nickname = user.name
       player.value.points = user.points
+      player.value.reward = user.reward ?? false
     }
   } catch (err) {
     console.error('Failed to load user profile:', err)
@@ -66,6 +73,12 @@ const closeAvatarModal = () => {
   showAvatarModal.value = false
   selectedAvatar.value = null
 }
+
+const discountAmount = computed(() => player.value.points)
+
+const goToQRCode = () => {
+  router.push({ path: '/my-qrcode', query: { token: route.query.token } })
+}
 </script>
 
 <template>
@@ -83,6 +96,21 @@ const closeAvatarModal = () => {
       <div class="display-score">{{ player.points }} 分</div>
       <div class="nickname-container">
         <span class="display-nickname">{{ player.nickname }}</span>
+      </div>
+    </div>
+
+    <div class="coupon-section">
+      <h3 class="coupon-title">票卷清單</h3>
+      <div class="coupon-card" :class="{ 'coupon-redeemed': player.reward }" @click="goToQRCode">
+        <div class="coupon-left">
+          <div class="coupon-discount">NTD {{ discountAmount }}</div>
+          <div class="coupon-off">OFF</div>
+        </div>
+        <div class="coupon-right">
+          <div class="coupon-name">紀念品折價卷</div>
+          <div class="coupon-desc-en">Souvenir Discount Coupon</div>
+          <div v-if="player.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
+        </div>
       </div>
     </div>
 
@@ -214,6 +242,100 @@ const closeAvatarModal = () => {
   font-family: 'M PLUS Rounded 1c', sans-serif;
   font-weight: bold;
   color: #333;
+}
+
+.coupon-section {
+  width: 100%;
+  max-width: 400px;
+  flex-shrink: 0;
+}
+
+.coupon-title {
+  font-size: 18px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 12px 0;
+}
+
+.coupon-card {
+  display: flex;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.coupon-left {
+  background-color: #E8707E;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  min-width: 100px;
+  border-right: 2px dashed #fbfaf2;
+}
+
+.coupon-discount {
+  font-size: 20px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.coupon-off {
+  font-size: 20px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+.coupon-right {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.coupon-name {
+  font-size: 16px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.coupon-desc {
+  font-size: 13px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  color: #888;
+}
+
+.coupon-desc-en {
+  font-size: 12px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+.coupon-redeemed {
+  opacity: 0.6;
+}
+
+.coupon-redeemed .coupon-left {
+  background-color: #bbb;
+}
+
+.coupon-redeemed-badge {
+  font-size: 12px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #ff5f5f;
+  margin-top: 4px;
 }
 
 .avatar-modal-overlay {
