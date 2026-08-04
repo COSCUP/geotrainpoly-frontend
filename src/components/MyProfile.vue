@@ -88,7 +88,7 @@ const discountAmount = computed(() => player.value.points)
 const showAdModal = ref(false)
 const adClicked = ref(false)
 
-const LOTTERY_START = new Date('2026-08-04T09:00:00+08:00')
+const LOTTERY_START = new Date('2026-08-08T09:00:00+08:00')
 const LOTTERY_END = new Date('2026-08-09T17:00:00+08:00')
 
 const lotteryStatus = computed(() => {
