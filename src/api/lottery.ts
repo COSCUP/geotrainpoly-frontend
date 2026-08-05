@@ -19,6 +19,21 @@ export async function read_ad() {
 }
 
 
+export async function redeem_coffee() {
+  const res = await fetch(`${API_BASE_URL}/coffee`,
+    {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${API_TOKEN}`
+      },
+    }
+  )
+
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+  const data = await res.json()
+  return data
+}
+
 export async function get_lottery() {
   const res = await fetch(`${API_BASE_URL}/coffee`,
     {

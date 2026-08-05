@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { getUserProfile } from '../api/get_profiles'
-import { read_ad } from '../api/lottery'
+import { read_ad, redeem_coffee } from '../api/lottery'
 
 const router = useRouter()
 const route = useRoute()
@@ -117,6 +117,29 @@ const proceedToLottery = () => {
   router.push({ path: '/lottery', query: { token: route.query.token } })
 }
 
+const showCoffeeModal = ref(false)
+
+const openCoffeeModal = () => {
+  if (player.value.coffee?.reward) return
+  showCoffeeModal.value = true
+}
+
+const closeCoffeeModal = () => {
+  showCoffeeModal.value = false
+}
+
+const confirmRedeem = async () => {
+  try {
+    await redeem_coffee()
+    if (player.value.coffee) {
+      player.value.coffee.reward = true
+    }
+    showCoffeeModal.value = false
+  } catch (err) {
+    console.error('Redeem failed:', err)
+  }
+}
+
 const goToQRCode = () => {
   router.push({ path: '/my-qrcode', query: { token: route.query.token } })
 }
@@ -153,13 +176,14 @@ const goToQRCode = () => {
           <div v-if="player.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
         </div>
       </div>
-      <div v-if="player.coffee?.win === true" class="coupon-card coupon-coffee" :class="{ 'coupon-redeemed': player.coffee.reward }" @click="goToQRCode">
+      <div v-if="player.coffee?.win === true" class="coupon-card coupon-coffee" :class="{ 'coupon-redeemed': player.coffee.reward }" @click="openCoffeeModal">
         <div class="coupon-left coupon-left-coffee">
           <div class="coupon-discount">FREE</div>
         </div>
         <div class="coupon-right">
-          <div class="coupon-name">咖啡兌換卷</div>
-          <div class="coupon-desc-en">Coffee Redemption Coupon</div>
+          <div class="coupon-name">實體咖啡卷兌換</div>
+          <div class="coupon-desc-en">Coffee Coupon Redemption</div>
+          <div class="coupon-desc">前往 TR 1F 兌換 Redeem at TR 1F booth</div>
           <div v-if="player.coffee.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
         </div>
       </div>
@@ -177,6 +201,22 @@ const goToQRCode = () => {
       </div>
       <div v-if="player.coffee !== null && player.coffee.win !== null" class="ad-banner" @click="goToLottery">
         📢 Grafana & Friends Taipei — Join us!
+      </div>
+    </div>
+
+    <div v-if="showCoffeeModal" class="avatar-modal-overlay" @click.self="closeCoffeeModal">
+      <div class="avatar-modal-content coffee-modal">
+        <button class="popup-close" @click="closeCoffeeModal">x</button>
+        <h3>☕ 咖啡兌換 Coffee Redemption</h3>
+        <div class="coffee-warning">
+          ⚠️ 請在工作人員指示下操作<br>
+          Please operate under staff guidance
+        </div>
+        <p class="coffee-modal-desc">
+          點擊下方按鈕完成兌換，兌換後無法復原。<br>
+          Press the button below to redeem. This action cannot be undone.
+        </p>
+        <button class="coffee-redeem-btn" @click="confirmRedeem">兌換 Redeem</button>
       </div>
     </div>
 
@@ -424,6 +464,43 @@ const goToQRCode = () => {
 
 .coupon-left-coffee {
   background-color: #6B4226;
+}
+
+.coffee-modal {
+  text-align: center;
+}
+
+.coffee-warning {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 16px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #856404;
+  margin: 12px 0;
+  line-height: 1.6;
+}
+
+.coffee-modal-desc {
+  font-size: 14px;
+  font-family: 'M PLUS Rounded 1c', sans-serif;
+  color: #666;
+  line-height: 1.6;
+  margin: 12px 0 16px;
+}
+
+.coffee-redeem-btn {
+  background-color: #6B4226;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 18px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
 }
 
 .ad-modal {
