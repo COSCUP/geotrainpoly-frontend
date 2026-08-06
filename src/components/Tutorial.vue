@@ -29,7 +29,7 @@ function startTutorial() {
     img.onload = () => {
       console.log(`Tutorial image ${i} loaded.`)
     }
-    img.src = `/assets/tutorial-${i}.png`
+    img.src = `/assets/tutorial-${i}.webp`
     images.value.push(img)
   }
 }
@@ -50,7 +50,7 @@ function nextPage() {
 
 <template>
   <div v-if="show" class="tutorial-overlay" @click="nextPage">
-    <img :src="`/assets/tutorial-${page + 1}.png`" class="tutorial-image" />
+    <img :src="`/assets/tutorial-${page + 1}.webp`" class="tutorial-image" />
     <div class="tutorial-progress">點擊繼續（{{ page + 1 }}/{{ total }}）</div>
   </div>
 </template>

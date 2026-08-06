@@ -196,9 +196,9 @@ export class Game extends Scene {
 
     canvas2!.refresh()
 
-    this.add.image(GameData.screenWidth - 40, 110, 'tutorial-button').setOrigin(0.5)
+    this.add.image(GameData.screenWidth - 110, 40, 'tutorial-button').setOrigin(0.5)
 
-    const tutorialBtn = this.add.image(GameData.screenWidth - 40, 110, 'question').setOrigin(0.5).setScale(0.5).setInteractive()
+    const tutorialBtn = this.add.image(GameData.screenWidth - 110, 40, 'question').setOrigin(0.5).setScale(0.5).setInteractive()
     tutorialBtn.setScrollFactor(0)
 
     tutorialBtn.on('pointerup', () => {
