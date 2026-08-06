@@ -228,6 +228,15 @@ const goToQRCode = () => {
           This Grafana & Friends meetup group hosts events focused on open source monitoring and observability using Grafana and related technologies. Some meetups feature formal presentations, while others are more relaxed and discussion-driven. Every event is designed to encourage learning, connection, and community. Snacks and stickers included!
         </p>
         <a
+          href="https://www.facebook.com/groups/25864461313213600/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ad-link-btn ad-link-fb"
+          @click="onAdLinkClick"
+        >
+          <Icon icon="mdi:facebook" class="fb-icon" /> Grafana & Friends Taipei
+        </a>
+        <a
           href="https://www.meetup.com/grafana-friends-taipei/?src=event&camp=coscup-2026"
           target="_blank"
           rel="noopener noreferrer"
@@ -527,6 +536,19 @@ const goToQRCode = () => {
   padding: 10px 20px;
   border-radius: 20px;
   margin-bottom: 12px;
+}
+
+.ad-link-fb {
+  background-color: #1877F2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fb-icon {
+  font-size: 22px;
+  vertical-align: middle;
 }
 
 .lottery-cta {
