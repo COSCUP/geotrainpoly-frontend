@@ -99,7 +99,7 @@ function markedIntro(intro: string) {
       <div v-if="popupData.booth.type === 'BASE'">
         <img
           alt="COSCUP x RubyConf Taiwan 2025 banner"
-          src="/assets/banner-mobile.png"
+          src="/assets/banner-mobile.webp"
         >
       </div>
       <div v-else-if="popupData.booth.type === 'BOOTHS'" class="Booths">
@@ -144,14 +144,14 @@ function markedIntro(intro: string) {
 }
 
 .popup-content {
-  width: 80%;
+  width: 90%;
   position: relative;
   background-color: white;
   color: black;
   border-radius: 16px;
-  padding: 24px;
+  padding: 12px;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
-  max-width: 70%;
+  max-width: 90%;
   text-align: center;
 }
 
