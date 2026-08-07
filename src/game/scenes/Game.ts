@@ -285,16 +285,18 @@ export class Game extends Scene {
     const apiResponse = await postCollect(boothId, xCoordinate)
 
     if (!apiResponse?.ok) {
-      return toast.error(`已搜集過此板塊了`, {
+      toast.error(`已搜集過此板塊了`, {
+        position: POSITION.BOTTOM_CENTER,
+        timeout: 3000,
+      })
+    } else {
+      toast.success(`成功收集到${apiResponse.body.booth}的板塊`, {
         position: POSITION.BOTTOM_CENTER,
         timeout: 3000,
       })
     }
 
-    toast.success(`成功收集到${apiResponse.body.booth}的板塊`, {
-      position: POSITION.BOTTOM_CENTER,
-      timeout: 3000,
-    })
+    EventBus.emit('tile-clicked', { type: 'BOOTHS', ID: boothId })
   }
 
   showAllTileInfo(show: boolean) {
