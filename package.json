@@ -24,7 +24,7 @@
   "scripts": {
     "dev": "node log.js dev & vite --config vite/config.dev.mjs",
     "build": "node log.js build & vite build --config vite/config.prod.mjs",
-    "postbuild": "mkdir -p dist/room && cp dist/index.html dist/room/index.html",
+    "postbuild": "mkdir -p dist/room dist/coffee && cp dist/index.html dist/room/index.html && cp dist/index.html dist/coffee/index.html",
     "dev-nolog": "vite --config vite/config.dev.mjs",
     "build-nolog": "vite build --config vite/config.prod.mjs",
     "lint": "eslint ."
