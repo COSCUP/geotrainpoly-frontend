@@ -5,6 +5,7 @@ import MyQRcode from '../components/QRCode.vue'
 import MyProfile from '../components/MyProfile.vue'
 import Room from '../components/Room.vue'
 import Lottery from '../components/Lottery.vue'
+import CoffeeLanding from '../components/CoffeeLanding.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -36,6 +37,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/lottery',
     name: 'lottery',
     component: Lottery
+  },
+  {
+    path: '/coffee',
+    name: 'coffee',
+    component: CoffeeLanding
   }
 ]
 
