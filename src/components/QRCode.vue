@@ -21,8 +21,7 @@ const onDetect = (decodedText: string) => {
     boothToken = payload
   }
 
-  EventBus.emit('add-new-hextile', boothToken)
-  router.push({ path: '/', query: { token: token.value } })
+  router.push({ path: '/', query: { token: token.value, booth: boothToken } })
 }
 </script>
 

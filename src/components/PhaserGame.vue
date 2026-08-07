@@ -7,7 +7,7 @@ import { GameData } from '../data/GameData.ts'
 import StartGame from '../game/main'
 import { get_hextiles_booth } from '../api/get_hextiles.ts'
 import Tutorial from './Tutorial.vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SessionCard from './SessionCard.vue'
 
 const emit = defineEmits(['current-active-scene'])
@@ -19,6 +19,7 @@ const popupData = ref()
 const renderer = new marked.Renderer()
 const tutorialRef = ref()
 const route = useRoute()
+const router = useRouter()
 const token = computed(() => route.query.token)
 const linkButtons = ref([
   { label: '連結一', url: 'https://coscup-tw.kktix.cc/events/preregist' },
@@ -39,6 +40,12 @@ onMounted(async () => {
   EventBus.on('current-scene-ready', (sceneInstance: Phaser.Scene) => {
     emit('current-active-scene', sceneInstance)
     scene.value = sceneInstance
+
+    const boothId = route.query.booth as string
+    if (boothId) {
+      scene.value.addNextHexTile(boothId)
+      router.replace({ path: '/', query: { token: token.value } })
+    }
   })
 
   EventBus.on('tile-clicked', async (data:{ type: string, ID: string }) => {
