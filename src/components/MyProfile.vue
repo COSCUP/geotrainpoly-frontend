@@ -228,6 +228,7 @@ const goToQRCode = () => {
           This Grafana & Friends meetup group hosts events focused on open source monitoring and observability using Grafana and related technologies. Some meetups feature formal presentations, while others are more relaxed and discussion-driven. Every event is designed to encourage learning, connection, and community. Snacks and stickers included!
         </p>
         <a
+          v-if="lotteryStatus === 'after'"
           href="https://www.facebook.com/groups/25864461313213600/"
           target="_blank"
           rel="noopener noreferrer"
