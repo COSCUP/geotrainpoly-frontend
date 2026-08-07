@@ -87,9 +87,9 @@ function markedIntro(intro: string) {
 </script>
 
 <template>
-  <div v-if="!token" class="no-token-message">
-      <p>請先去推倒售票亭！</p>
-      <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">點此前往</a>
+  <div v-if="!token" class="no-token-message" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
+      <p>請先完成參與者大調查！</p>
+      <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">參與者大調查</a>
   </div>
   <Tutorial ref="tutorialRef" v-if="scene" :scene="scene" />
   <div id="game-container" :style="{ bottom: `${GameData.bottomBarHeight}px` }" />
