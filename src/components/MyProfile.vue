@@ -54,6 +54,12 @@ onMounted(async () => {
   } catch (err) {
     console.error('Failed to load user profile:', err)
   }
+
+  if (route.query.coffee) {
+    showAdModal.value = true
+    adClicked.value = false
+    router.replace({ path: '/profile', query: { token: route.query.token } })
+  }
 })
 
 const showAvatarModal = ref(false)

@@ -12,9 +12,14 @@ const token = computed(() => route.query.token)
 const showMyQrCode = ref(true)
 
 const onDetect = (decodedText: string) => {
-  let boothToken: string;
   const payload = decodedText[0].rawValue
-  
+
+  if (payload === 'https://play.coscup.org/coffee') {
+    router.push({ path: '/profile', query: { token: token.value, coffee: '1' } })
+    return
+  }
+
+  let boothToken: string;
   if (payload.startsWith('http')) {
     boothToken = payload.split('room=')[1]
   } else {
