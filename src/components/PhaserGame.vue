@@ -93,7 +93,7 @@ function markedIntro(intro: string) {
   </div>
   <Tutorial ref="tutorialRef" v-if="scene" :scene="scene" />
   <div id="game-container" :style="{ bottom: `${GameData.bottomBarHeight}px` }" />
-  <div class="popup-overlay" id="popup" v-if="showPopup">
+  <div class="popup-overlay" id="popup" v-if="showPopup" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
     <div class="popup-content">
       <button class="popup-close" id="popupClose" @click="closePopup()">x</button>
       <div v-if="popupData.booth.type === 'BASE'">
