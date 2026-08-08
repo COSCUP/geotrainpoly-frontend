@@ -4,6 +4,9 @@ import { get_booth_info } from '../api/get_booths'
 import { useRoute, useRouter } from 'vue-router'
 import { GameData } from '../data/GameData.ts'
 import SessionCard from './SessionCard.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +47,7 @@ onMounted(async () => {
     </div>
 
     <div v-else class="loading-state">
-      <p>資料載入中...</p>
+      <p>{{ t('room.loading') }}</p>
     </div>
   </div>
 </template>

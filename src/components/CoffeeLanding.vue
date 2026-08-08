@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const route = useRoute()
@@ -17,14 +20,14 @@ onMounted(() => {
   <div class="coffee-landing">
     <div class="landing-card">
       <div class="landing-icon">☕</div>
-      <h2>咖啡抽獎 Coffee Lottery</h2>
+      <h2>{{ t('coffee.title') }}</h2>
       <p class="landing-desc">
-        你尚未登入或沒有身份驗證。<br>
-        You are not logged in or not authenticated.
+        {{ t('coffee.notLoggedIn') }}<br>
+        {{ t('coffee.notLoggedInEn') }}
       </p>
       <div class="landing-hint">
-        請使用 OPass 的「開源巔峰挑戰」掃描器掃描此 QR Code 來參加抽獎。<br>
-        Please use the OPass "Open Source Summit Challenge" scanner to scan this QR Code to join the lottery.
+        {{ t('coffee.useOPass') }}<br>
+        {{ t('coffee.useOPassEn') }}
       </div>
     </div>
   </div>

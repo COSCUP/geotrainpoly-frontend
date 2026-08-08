@@ -2,6 +2,9 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { get_lottery } from '../api/lottery'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const route = useRoute()
@@ -102,7 +105,7 @@ const goBack = () => {
 
 <template>
   <div class="lottery-page">
-    <h2 class="lottery-title">☕ 咖啡抽獎 Coffee Lottery</h2>
+    <h2 class="lottery-title">{{ t('lottery.title') }}</h2>
 
     <div class="wheel-container">
       <div class="wheel-pointer">▼</div>
@@ -132,20 +135,20 @@ const goBack = () => {
 
     <div v-if="quotaExceeded" class="result-section">
       <div class="result-quota">
-        今日抽獎名額已滿，請明天再來！<br>
-        Today's lottery quota is full. Please try again tomorrow!
+        {{ t('lottery.quotaFull') }}<br>
+        {{ t('lottery.quotaFullEn') }}
       </div>
-      <button class="back-btn" @click="goBack">返回 Back to Profile</button>
+      <button class="back-btn" @click="goBack">{{ t('lottery.back') }}</button>
     </div>
 
     <div v-else-if="finished" class="result-section">
       <div v-if="result?.win" class="result-win">
-        🎉 恭喜中獎！Congratulations!<br>你獲得一杯免費咖啡！You won a free coffee!
+        {{ t('lottery.win') }}<br>{{ t('lottery.winDesc') }}
       </div>
       <div v-else class="result-lose">
-        😢 很可惜沒有中獎<br>Better luck next time!
+        {{ t('lottery.lose') }}<br>{{ t('lottery.loseEn') }}
       </div>
-      <button class="back-btn" @click="goBack">返回 Back to Profile</button>
+      <button class="back-btn" @click="goBack">{{ t('lottery.back') }}</button>
     </div>
   </div>
 </template>

@@ -5,6 +5,7 @@ import { GameData } from '../../data/GameData.ts'
 import { get_hextiles } from '../../api/get_hextiles.ts'
 import { postCollect } from '../../api/post_collect.ts'
 import { useToast, POSITION } from 'vue-toastification'
+import i18n from '../../i18n'
 
 const toast = useToast()
 
@@ -284,13 +285,14 @@ export class Game extends Scene {
     
     const apiResponse = await postCollect(boothId, xCoordinate)
 
+    const t = i18n.global.t
     if (!apiResponse?.ok) {
-      toast.error(`已搜集過此板塊了`, {
+      toast.error(t('gameScene.alreadyCollected'), {
         position: POSITION.BOTTOM_CENTER,
         timeout: 3000,
       })
     } else {
-      toast.success(`成功收集到${apiResponse.body.booth}的板塊`, {
+      toast.success(t('gameScene.collectSuccess', { booth: apiResponse.body.booth }), {
         position: POSITION.BOTTOM_CENTER,
         timeout: 3000,
       })

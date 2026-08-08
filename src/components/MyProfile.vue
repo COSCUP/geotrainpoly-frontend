@@ -4,6 +4,9 @@ import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { getUserProfile } from '../api/get_profiles'
 import { read_ad, redeem_coffee } from '../api/lottery'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const router = useRouter()
 const route = useRoute()
@@ -163,23 +166,23 @@ const goToQRCode = () => {
     </div>
 
     <div class="info-section">
-      <div class="display-score">{{ player.points }} 分</div>
+      <div class="display-score">{{ player.points }} {{ t('profile.points') }}</div>
       <div class="nickname-container">
         <span class="display-nickname">{{ player.nickname }}</span>
       </div>
     </div>
 
     <div class="coupon-section">
-      <h3 class="coupon-title">票卷清單</h3>
+      <h3 class="coupon-title">{{ t('profile.couponList') }}</h3>
       <div class="coupon-card" :class="{ 'coupon-redeemed': player.reward }" @click="goToQRCode">
         <div class="coupon-left">
           <div class="coupon-discount">NTD {{ discountAmount }}</div>
           <div class="coupon-off">OFF</div>
         </div>
         <div class="coupon-right">
-          <div class="coupon-name">紀念品折價卷</div>
-          <div class="coupon-desc-en">Souvenir Discount Coupon</div>
-          <div v-if="player.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
+          <div class="coupon-name">{{ t('profile.souvenirCoupon') }}</div>
+          <div class="coupon-desc-en">{{ t('profile.souvenirCouponEn') }}</div>
+          <div v-if="player.reward" class="coupon-redeemed-badge">{{ t('profile.redeemed') }}</div>
         </div>
       </div>
       <div v-if="player.coffee?.win === true" class="coupon-card coupon-coffee" :class="{ 'coupon-redeemed': player.coffee.reward }" @click="openCoffeeModal">
@@ -187,42 +190,42 @@ const goToQRCode = () => {
           <div class="coupon-discount">FREE</div>
         </div>
         <div class="coupon-right">
-          <div class="coupon-name">實體咖啡卷兌換</div>
-          <div class="coupon-desc-en">Coffee Coupon Redemption</div>
-          <div class="coupon-desc">前往 TR 1F 兌換 Redeem at TR 1F booth</div>
-          <div v-if="player.coffee.reward" class="coupon-redeemed-badge">已兌換 Redeemed</div>
+          <div class="coupon-name">{{ t('profile.coffeeCoupon') }}</div>
+          <div class="coupon-desc-en">{{ t('profile.coffeeCouponEn') }}</div>
+          <div class="coupon-desc">{{ t('profile.coffeeRedeemLocation') }}</div>
+          <div v-if="player.coffee.reward" class="coupon-redeemed-badge">{{ t('profile.redeemed') }}</div>
         </div>
       </div>
       <div v-if="player.coffee === null && lotteryStatus === 'before'" class="lottery-cta" @click="goToLottery">
-        🎰 抽獎尚未開放 Lottery not yet available
+        {{ t('profile.lotteryNotYet') }}
       </div>
       <div v-if="player.coffee === null && lotteryStatus === 'active'" class="lottery-cta" @click="goToLottery">
-        🎰 點我抽咖啡卷！Try your luck for a free coffee!
+        {{ t('profile.lotteryTryLuck') }}
       </div>
       <div v-if="player.coffee !== null && player.coffee.win === null && lotteryStatus === 'before'" class="lottery-cta" @click="goToLottery">
-        🎰 抽獎尚未開放 Lottery not yet available
+        {{ t('profile.lotteryNotYet') }}
       </div>
       <div v-if="player.coffee !== null && player.coffee.win === null && lotteryStatus === 'active'" class="lottery-cta" @click="goToLottery">
-        🎰 點我抽咖啡卷！Try your luck for a free coffee!
+        {{ t('profile.lotteryTryLuck') }}
       </div>
       <div v-if="player.coffee !== null && player.coffee.win !== null" class="ad-banner" @click="goToLottery">
-        📢 Grafana & Friends Taipei — Join us!
+        {{ t('profile.adBanner') }}
       </div>
     </div>
 
     <div v-if="showCoffeeModal" class="avatar-modal-overlay" @click.self="closeCoffeeModal">
       <div class="avatar-modal-content coffee-modal">
         <button class="popup-close" @click="closeCoffeeModal">x</button>
-        <h3>☕ 咖啡兌換 Coffee Redemption</h3>
+        <h3>{{ t('profile.coffeeRedemption') }}</h3>
         <div class="coffee-warning">
-          ⚠️ 請在工作人員指示下操作<br>
-          Please operate under staff guidance
+          {{ t('profile.staffWarning') }}<br>
+          {{ t('profile.staffWarningEn') }}
         </div>
         <p class="coffee-modal-desc">
-          點擊下方按鈕完成兌換，兌換後無法復原。<br>
-          Press the button below to redeem. This action cannot be undone.
+          {{ t('profile.redeemDesc') }}<br>
+          {{ t('profile.redeemDescEn') }}
         </p>
-        <button class="coffee-redeem-btn" @click="confirmRedeem">兌換 Redeem</button>
+        <button class="coffee-redeem-btn" @click="confirmRedeem">{{ t('profile.redeem') }}</button>
       </div>
     </div>
 
@@ -252,16 +255,16 @@ const goToQRCode = () => {
         >
           Join Meetup ↗
         </a>
-        <div v-if="lotteryStatus === 'before'" class="lottery-not-open">抽獎尚未開放 Lottery not yet available</div>
-        <button v-else-if="player.coffee === null" class="modal-confirm-button" :class="{ 'btn-disabled': !adClicked }" :disabled="!adClicked" @click="proceedToLottery">開始抽獎 Start Lottery</button>
-        <button v-else-if="player.coffee?.win === null" class="modal-confirm-button" @click="proceedToLottery">開始抽獎 Start Lottery</button>
+        <div v-if="lotteryStatus === 'before'" class="lottery-not-open">{{ t('profile.lotteryNotOpen') }}</div>
+        <button v-else-if="player.coffee === null" class="modal-confirm-button" :class="{ 'btn-disabled': !adClicked }" :disabled="!adClicked" @click="proceedToLottery">{{ t('profile.startLottery') }}</button>
+        <button v-else-if="player.coffee?.win === null" class="modal-confirm-button" @click="proceedToLottery">{{ t('profile.startLottery') }}</button>
       </div>
     </div>
 
     <div v-if="showAvatarModal" class="avatar-modal-overlay" @click.self="closeAvatarModal">
       <div class="avatar-modal-content">
         <button class="popup-close" @click="closeAvatarModal">x</button>
-        <h3>選擇喜歡的頭像</h3>
+        <h3>{{ t('profile.chooseAvatar') }}</h3>
         <div class="avatar-options">
           <div
             v-for="(avatarPath, index) in avatarList"
@@ -273,7 +276,7 @@ const goToQRCode = () => {
             <img :src="avatarPath" alt="Avatar Option" class="avatar-option-image">
           </div>
         </div>
-        <button class="modal-confirm-button" @click="confirmAvatar">確定</button>
+        <button class="modal-confirm-button" @click="confirmAvatar">{{ t('profile.confirm') }}</button>
       </div>
     </div>
   </div>

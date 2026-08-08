@@ -5,6 +5,9 @@ import { useRoute, useRouter } from 'vue-router'
 import { computed, ref } from 'vue'
 import { Icon } from '@iconify/vue'
 import { EventBus } from '../game/EventBus'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const route = useRoute()
 const router = useRouter()
@@ -44,7 +47,7 @@ const onDetect = (decodedText: string) => {
 
     <button class="show-my-qr-button" @click="showMyQrCode = !showMyQrCode">
       <Icon :icon="showMyQrCode ? 'tabler:scan' : 'tabler:qrcode'" class="button-icon"></Icon>
-      <span>{{ showMyQrCode ? '掃描 QR Code' : '顯示 QR Code' }}</span>
+      <span>{{ showMyQrCode ? t('qrcode.scan') : t('qrcode.show') }}</span>
     </button>
   </div>
 </template>

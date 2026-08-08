@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   session: any
@@ -8,7 +11,7 @@ const props = defineProps<{
 
 const formattedTime = computed(() => {
   const session = props.session
-  if (!session?.start || !session?.end) return '暫無時間資訊'
+  if (!session?.start || !session?.end) return t('session.noTime')
 
   const startDate = new Date(session.start)
   const endDate = new Date(session.end)
@@ -38,22 +41,22 @@ const actionButtons = computed(() => {
   const session = props.session
   return [
     {
-      label: '議程連結 (Official Website)',
+      label: t('session.officialWebsite'),
       url: session?.uri,
       enabled: !!session?.uri,
     },
     {
-      label: '共筆 (Co-write)',
+      label: t('session.coWrite'),
       url: session?.co_write || '',
       enabled: !!session?.co_write,
     },
     {
-      label: '議程問卷 (Survey)',
+      label: t('session.survey'),
       url: `https://coscup.org/2026-feedback/?session=${session?.id}`,
       enabled: !!session?.id,
     },
     {
-      label: '即時口譯 (Interpretation)',
+      label: t('session.interpretation'),
       url: session?.record || '',
       enabled: !!session?.record,
     },
@@ -84,8 +87,8 @@ const actionButtons = computed(() => {
     <div class="info-grid">
       <div class="info-row">
         <div class="info-label">
-          <strong>時間</strong>
-          <small>Time</small>
+          <strong>{{ t('session.time') }}</strong>
+          <small>{{ t('session.timeEn') }}</small>
         </div>
         <div class="info-value">
           {{ formattedTime }}
@@ -94,8 +97,8 @@ const actionButtons = computed(() => {
 
       <div class="info-row">
         <div class="info-label">
-          <strong>講者</strong>
-          <small>Speaker</small>
+          <strong>{{ t('session.speaker') }}</strong>
+          <small>{{ t('session.speakerEn') }}</small>
         </div>
         <div class="info-value">
           {{ session?.speakers?.join(', ') }}
@@ -104,8 +107,8 @@ const actionButtons = computed(() => {
 
       <div class="info-row" v-if="session?.language">
         <div class="info-label">
-          <strong>語言</strong>
-          <small>Language</small>
+          <strong>{{ t('session.language') }}</strong>
+          <small>{{ t('session.languageEn') }}</small>
         </div>
         <div class="info-value">
           {{ session?.language }}

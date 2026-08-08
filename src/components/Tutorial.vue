@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type Phaser from 'phaser'
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const show = ref(false)
 const page = ref(0)
@@ -51,7 +54,7 @@ function nextPage() {
 <template>
   <div v-if="show" class="tutorial-overlay" @click="nextPage">
     <img :src="`/assets/tutorial-${page + 1}.webp`" class="tutorial-image" />
-    <div class="tutorial-progress">點擊繼續（{{ page + 1 }}/{{ total }}）</div>
+    <div class="tutorial-progress">{{ t('tutorial.clickToContinue') }}（{{ page + 1 }}/{{ total }}）</div>
   </div>
 </template>
 

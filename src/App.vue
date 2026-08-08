@@ -2,7 +2,16 @@
 import { computed, provide, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { useI18n } from 'vue-i18n'
+import { setLocale } from './i18n'
 import './style.css'
+
+const { t, locale } = useI18n()
+
+function toggleLocale() {
+  const next = locale.value === 'zh-TW' ? 'en' : 'zh-TW'
+  setLocale(next)
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -43,13 +52,17 @@ provide('token', token)
     <Icon icon="tabler:logout" class="logout-icon" />
   </button>
 
+  <button class="locale-button" :style="{ left: token ? '56px' : '10px' }" @click="toggleLocale">
+    {{ locale === 'zh-TW' ? 'EN' : '中' }}
+  </button>
+
   <div v-if="showLogoutConfirm" class="logout-overlay" @click.self="showLogoutConfirm = false" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
     <div class="logout-dialog">
-      <p>確定要登出嗎？</p>
-      <p class="logout-sub">Are you sure you want to logout?</p>
+      <p>{{ t('app.logoutConfirm') }}</p>
+      <p class="logout-sub">{{ t('app.logoutConfirmEn') }}</p>
       <div class="logout-actions">
-        <button class="logout-cancel" @click="showLogoutConfirm = false">取消</button>
-        <button class="logout-confirm" @click="confirmLogout">登出</button>
+        <button class="logout-cancel" @click="showLogoutConfirm = false">{{ t('app.cancel') }}</button>
+        <button class="logout-confirm" @click="confirmLogout">{{ t('app.logout') }}</button>
       </div>
     </div>
   </div>
@@ -57,22 +70,22 @@ provide('token', token)
   <div class="bottom-bar">
     <button class="button button-booths" @click="goToBoothsList">
        <Icon icon="tabler:building-store" class="icon" />
-      <span>攤位列表</span>
+      <span>{{ t('app.boothList') }}</span>
     </button>
 
     <button class="button button-game" v-if="route.name !== 'game'" @click="goToGameScene">
        <Icon icon="ph:game-controller" class="icon" />
-      <span>遊戲畫面</span>
+      <span>{{ t('app.gameScreen') }}</span>
     </button>
 
     <button class="button button-qrcode"  v-else @click="showMyQrCode">
       <Icon icon="tabler:qrcode" class="icon"></Icon>
-      <span>顯示 QR Code</span>
+      <span>{{ t('app.showQRCode') }}</span>
     </button>
 
     <button class="button button-profile" @click="goToProfile">
        <Icon icon="mdi:user-circle-outline" class="icon" />
-      <span>個人頁面</span>
+      <span>{{ t('app.profile') }}</span>
     </button>
   </div>
 </template>
@@ -139,6 +152,26 @@ provide('token', token)
   border-radius: 50%;
   padding: 5px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.locale-button {
+  position: fixed;
+  top: 10px;
+  left: 56px;
+  z-index: 102;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: white;
+  font-size: 13px;
+  font-weight: bold;
 }
 
 .logout-button {

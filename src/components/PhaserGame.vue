@@ -10,6 +10,9 @@ import Tutorial from './Tutorial.vue'
 import { useRoute, useRouter } from 'vue-router'
 import SessionCard from './SessionCard.vue'
 import { QrcodeStream } from 'vue-qrcode-reader'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const emit = defineEmits(['current-active-scene'])
 // Save the current scene instance
@@ -47,22 +50,22 @@ async function validateAndSaveToken(inputToken: string) {
       },
     })
     if (!res.ok) {
-      tokenError.value = 'Token 無效，請重新輸入 / Invalid token'
+      tokenError.value = t('game.invalidToken')
       return
     }
     localStorage.setItem('userToken', inputToken)
     window.location.replace(`${window.location.pathname}?token=${inputToken}`)
   } catch {
-    tokenError.value = '網路錯誤，請稍後再試 / Network error'
+    tokenError.value = t('game.networkError')
   } finally {
     tokenLoading.value = false
   }
 }
 
 function onSubmitToken() {
-  const t = manualToken.value.trim()
-  if (!t) return
-  validateAndSaveToken(t)
+  const val = manualToken.value.trim()
+  if (!val) return
+  validateAndSaveToken(val)
 }
 
 function onScanDetect(result: any) {
@@ -92,7 +95,7 @@ async function onImageSelected(event: Event) {
     const { default: jsQR } = await import('jsqr')
     const code = jsQR(imageData.data, canvas.width, canvas.height)
     if (!code) {
-      tokenError.value = '無法從圖片中讀取 QR Code / No QR code found in image'
+      tokenError.value = t('game.noQRCodeInImage')
       return
     }
     let scannedToken = code.data
@@ -102,7 +105,7 @@ async function onImageSelected(event: Event) {
     }
     validateAndSaveToken(scannedToken)
   } catch {
-    tokenError.value = '圖片讀取失敗 / Failed to read image'
+    tokenError.value = t('game.imageReadFailed')
   }
 }
 
@@ -167,29 +170,29 @@ function markedIntro(intro: string) {
 
 <template>
   <div v-if="!token" class="no-token-message" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
-      <p>請先完成參與者大調查！</p>
-      <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">參與者大調查</a>
+      <p>{{ t('game.completeServey') }}</p>
+      <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">{{ t('game.participantSurvey') }}</a>
 
       <div class="token-divider">
-        <span>或 / OR</span>
+        <span>{{ t('game.or') }}</span>
       </div>
 
       <div class="token-entry-buttons">
-        <button class="survey-button" @click="showManualInput = true; showScanner = false; showImagePicker = false">手動輸入 Token</button>
-        <button class="survey-button" @click="showScanner = true; showManualInput = false; showImagePicker = false">掃描 QR Code</button>
-        <button class="survey-button" @click="showImagePicker = true; showManualInput = false; showScanner = false">從圖片讀取</button>
+        <button class="survey-button" @click="showManualInput = true; showScanner = false; showImagePicker = false">{{ t('game.manualInput') }}</button>
+        <button class="survey-button" @click="showScanner = true; showManualInput = false; showImagePicker = false">{{ t('game.scanQRCode') }}</button>
+        <button class="survey-button" @click="showImagePicker = true; showManualInput = false; showScanner = false">{{ t('game.readFromImage') }}</button>
       </div>
 
       <div v-if="showManualInput" class="token-input-area">
         <input
           v-model="manualToken"
           type="text"
-          placeholder="請輸入 Token"
+          :placeholder="t('game.enterToken')"
           class="token-input"
           @keyup.enter="onSubmitToken"
         />
         <button class="survey-button token-submit" @click="onSubmitToken" :disabled="tokenLoading">
-          {{ tokenLoading ? '驗證中...' : '送出' }}
+          {{ tokenLoading ? t('game.verifying') : t('game.submit') }}
         </button>
       </div>
 
@@ -199,10 +202,10 @@ function markedIntro(intro: string) {
 
       <div v-if="showImagePicker" class="token-image-area">
         <label class="survey-button image-picker-label">
-          選擇圖片 / Select Image
+          {{ t('game.selectImage') }}
           <input type="file" accept="image/*" class="image-picker-input" @change="onImageSelected" />
         </label>
-        <p class="image-hint">選擇含有 QR Code 的圖片<br>Select an image with a QR Code</p>
+        <p class="image-hint">{{ t('game.selectImageHint') }}</p>
       </div>
 
       <p v-if="tokenError" class="token-error">{{ tokenError }}</p>
