@@ -9,6 +9,7 @@ import { get_hextiles_booth } from '../api/get_hextiles.ts'
 import Tutorial from './Tutorial.vue'
 import { useRoute, useRouter } from 'vue-router'
 import SessionCard from './SessionCard.vue'
+import { QrcodeStream } from 'vue-qrcode-reader'
 
 const emit = defineEmits(['current-active-scene'])
 // Save the current scene instance
@@ -26,6 +27,53 @@ const linkButtons = ref([
   { label: '連結二', url: 'https://coscup-tw.kktix.cc/events/preregist' },
   { label: '連結三', url: 'https://coscup-tw.kktix.cc/events/preregist' }
 ])
+
+const showManualInput = ref(false)
+const showScanner = ref(false)
+const manualToken = ref('')
+const tokenError = ref('')
+const tokenLoading = ref(false)
+
+async function validateAndSaveToken(inputToken: string) {
+  tokenError.value = ''
+  tokenLoading.value = true
+  try {
+    const res = await fetch(`${GameData.apiBaseUrl}/profiles`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${inputToken}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    if (!res.ok) {
+      tokenError.value = 'Token 無效，請重新輸入 / Invalid token'
+      return
+    }
+    localStorage.setItem('userToken', inputToken)
+    router.replace({ query: { ...route.query, token: inputToken } })
+  } catch {
+    tokenError.value = '網路錯誤，請稍後再試 / Network error'
+  } finally {
+    tokenLoading.value = false
+  }
+}
+
+function onSubmitToken() {
+  const t = manualToken.value.trim()
+  if (!t) return
+  validateAndSaveToken(t)
+}
+
+function onScanDetect(result: any) {
+  const payload = result[0].rawValue
+  let scannedToken = payload
+  if (payload.startsWith('http')) {
+    const url = new URL(payload)
+    scannedToken = url.searchParams.get('token') || payload
+  }
+  showScanner.value = false
+  validateAndSaveToken(scannedToken)
+}
 
 renderer.link = function ({href, text}) {
   return `<a href="${href}" target="_blank">${text}</a>`
@@ -90,6 +138,34 @@ function markedIntro(intro: string) {
   <div v-if="!token" class="no-token-message" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
       <p>請先完成參與者大調查！</p>
       <a href="https://coscup-tw.kktix.cc/events/preregist" target="_blank" class="survey-button">參與者大調查</a>
+
+      <div class="token-divider">
+        <span>或 / OR</span>
+      </div>
+
+      <div class="token-entry-buttons">
+        <button class="survey-button" @click="showManualInput = true; showScanner = false">手動輸入 Token</button>
+        <button class="survey-button" @click="showScanner = true; showManualInput = false">掃描 QR Code</button>
+      </div>
+
+      <div v-if="showManualInput" class="token-input-area">
+        <input
+          v-model="manualToken"
+          type="text"
+          placeholder="請輸入 Token"
+          class="token-input"
+          @keyup.enter="onSubmitToken"
+        />
+        <button class="survey-button token-submit" @click="onSubmitToken" :disabled="tokenLoading">
+          {{ tokenLoading ? '驗證中...' : '送出' }}
+        </button>
+      </div>
+
+      <div v-if="showScanner" class="token-scanner-area">
+        <qrcode-stream @detect="onScanDetect"></qrcode-stream>
+      </div>
+
+      <p v-if="tokenError" class="token-error">{{ tokenError }}</p>
   </div>
   <Tutorial ref="tutorialRef" v-if="scene" :scene="scene" />
   <div id="game-container" :style="{ bottom: `${GameData.bottomBarHeight}px` }" />
@@ -267,5 +343,64 @@ img {
   font-size: 1em;
   gap: 5px;
   -webkit-tap-highlight-color: transparent;
+}
+
+.token-divider {
+  margin: 24px 0 16px;
+  color: #aaa;
+  font-size: 0.9em;
+}
+
+.token-entry-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.token-input-area {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 80%;
+  max-width: 400px;
+}
+
+.token-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 2px solid #555;
+  border-radius: 20px;
+  background: #222;
+  color: white;
+  font-size: 1em;
+  outline: none;
+}
+
+.token-input:focus {
+  border-color: #aaa;
+}
+
+.token-submit {
+  white-space: nowrap;
+}
+
+.token-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.token-scanner-area {
+  width: 80%;
+  max-width: 300px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #f30000;
+}
+
+.token-error {
+  color: #ff5f5f;
+  margin-top: 12px;
+  font-size: 0.9em;
 }
 </style>

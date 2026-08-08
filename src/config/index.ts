@@ -50,4 +50,17 @@ const router = createRouter({
   routes
 })
 
+router.beforeEach((to, _from, next) => {
+  if (!to.query.token) {
+    const savedToken = localStorage.getItem('userToken')
+    if (savedToken) {
+      next({ ...to, query: { ...to.query, token: savedToken } } as any)
+      return
+    }
+  } else {
+    localStorage.setItem('userToken', to.query.token as string)
+  }
+  next()
+})
+
 export default router
