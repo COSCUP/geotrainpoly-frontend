@@ -44,6 +44,9 @@ export async function get_lottery() {
     }
   )
 
+  if (res.status === 406) {
+    throw { status: 406, message: 'quota_exceeded' }
+  }
   if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
   const data = await res.json()
   return data

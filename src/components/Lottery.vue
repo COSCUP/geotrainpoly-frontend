@@ -22,6 +22,7 @@ const segmentAngle = 360 / segmentCount
 
 const spinning = ref(false)
 const finished = ref(false)
+const quotaExceeded = ref(false)
 const rotation = ref(0)
 const result = ref<{ win: boolean } | null>(null)
 
@@ -85,8 +86,12 @@ async function startSpin() {
       spinning.value = false
       finished.value = true
     }, 5200)
-  } catch (err) {
-    console.error('Lottery failed:', err)
+  } catch (err: any) {
+    if (err?.status === 406) {
+      quotaExceeded.value = true
+    } else {
+      console.error('Lottery failed:', err)
+    }
   }
 }
 
@@ -125,7 +130,15 @@ const goBack = () => {
       </svg>
     </div>
 
-    <div v-if="finished" class="result-section">
+    <div v-if="quotaExceeded" class="result-section">
+      <div class="result-quota">
+        今日抽獎名額已滿，請明天再來！<br>
+        Today's lottery quota is full. Please try again tomorrow!
+      </div>
+      <button class="back-btn" @click="goBack">返回 Back to Profile</button>
+    </div>
+
+    <div v-else-if="finished" class="result-section">
       <div v-if="result?.win" class="result-win">
         🎉 恭喜中獎！Congratulations!<br>你獲得一杯免費咖啡！You won a free coffee!
       </div>
@@ -209,6 +222,18 @@ const goBack = () => {
   color: #666;
   background-color: #f5f5f5;
   border: 2px solid #ddd;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+}
+
+.result-quota {
+  font-size: 18px;
+  font-family: 'Zen Maru Gothic', sans-serif;
+  font-weight: bold;
+  color: #856404;
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
   border-radius: 12px;
   padding: 16px 24px;
   margin-bottom: 16px;
