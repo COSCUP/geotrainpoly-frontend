@@ -50,7 +50,7 @@ async function validateAndSaveToken(inputToken: string) {
       return
     }
     localStorage.setItem('userToken', inputToken)
-    router.replace({ query: { ...route.query, token: inputToken } })
+    window.location.replace(`${window.location.pathname}?token=${inputToken}`)
   } catch {
     tokenError.value = '網路錯誤，請稍後再試 / Network error'
   } finally {
