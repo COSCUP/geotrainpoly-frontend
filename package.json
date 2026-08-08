@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
+    "jsqr": "^1.4.0",
     "marked": "^16.0.0",
     "phaser": "^3.90.0",
     "qrcode.vue": "^3.6.0",

@@ -30,6 +30,7 @@ const linkButtons = ref([
 
 const showManualInput = ref(false)
 const showScanner = ref(false)
+const showImagePicker = ref(false)
 const manualToken = ref('')
 const tokenError = ref('')
 const tokenLoading = ref(false)
@@ -73,6 +74,36 @@ function onScanDetect(result: any) {
   }
   showScanner.value = false
   validateAndSaveToken(scannedToken)
+}
+
+async function onImageSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (!input.files?.length) return
+  const file = input.files[0]
+  try {
+    const bitmap = await createImageBitmap(file)
+    const canvas = document.createElement('canvas')
+    canvas.width = bitmap.width
+    canvas.height = bitmap.height
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(bitmap, 0, 0)
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+    const { default: jsQR } = await import('jsqr')
+    const code = jsQR(imageData.data, canvas.width, canvas.height)
+    if (!code) {
+      tokenError.value = '無法從圖片中讀取 QR Code / No QR code found in image'
+      return
+    }
+    let scannedToken = code.data
+    if (scannedToken.startsWith('http')) {
+      const url = new URL(scannedToken)
+      scannedToken = url.searchParams.get('token') || scannedToken
+    }
+    validateAndSaveToken(scannedToken)
+  } catch {
+    tokenError.value = '圖片讀取失敗 / Failed to read image'
+  }
 }
 
 renderer.link = function ({href, text}) {
@@ -144,8 +175,9 @@ function markedIntro(intro: string) {
       </div>
 
       <div class="token-entry-buttons">
-        <button class="survey-button" @click="showManualInput = true; showScanner = false">手動輸入 Token</button>
-        <button class="survey-button" @click="showScanner = true; showManualInput = false">掃描 QR Code</button>
+        <button class="survey-button" @click="showManualInput = true; showScanner = false; showImagePicker = false">手動輸入 Token</button>
+        <button class="survey-button" @click="showScanner = true; showManualInput = false; showImagePicker = false">掃描 QR Code</button>
+        <button class="survey-button" @click="showImagePicker = true; showManualInput = false; showScanner = false">從圖片讀取</button>
       </div>
 
       <div v-if="showManualInput" class="token-input-area">
@@ -163,6 +195,14 @@ function markedIntro(intro: string) {
 
       <div v-if="showScanner" class="token-scanner-area">
         <qrcode-stream @detect="onScanDetect"></qrcode-stream>
+      </div>
+
+      <div v-if="showImagePicker" class="token-image-area">
+        <label class="survey-button image-picker-label">
+          選擇圖片 / Select Image
+          <input type="file" accept="image/*" class="image-picker-input" @change="onImageSelected" />
+        </label>
+        <p class="image-hint">選擇含有 QR Code 的圖片<br>Select an image with a QR Code</p>
       </div>
 
       <p v-if="tokenError" class="token-error">{{ tokenError }}</p>
@@ -353,6 +393,7 @@ img {
 
 .token-entry-buttons {
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -396,6 +437,24 @@ img {
   border-radius: 12px;
   overflow: hidden;
   border: 3px solid #f30000;
+}
+
+.token-image-area {
+  text-align: center;
+}
+
+.image-picker-label {
+  cursor: pointer;
+}
+
+.image-picker-input {
+  display: none;
+}
+
+.image-hint {
+  color: #aaa;
+  font-size: 0.85em;
+  line-height: 1.5;
 }
 
 .token-error {
