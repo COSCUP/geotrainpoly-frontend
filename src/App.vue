@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide } from 'vue';
+import { computed, provide, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import './style.css'
@@ -25,11 +25,34 @@ const goToGameScene = () => {
   router.push({ path: '/', query: { token: token.value } })
 }
 
+const showLogoutConfirm = ref(false)
+
+function confirmLogout() {
+  localStorage.removeItem('userToken')
+  showLogoutConfirm.value = false
+  router.replace({ path: '/', query: {} })
+}
+
 provide('token', token)
 </script>
 
 <template>
   <router-view />
+
+  <button v-if="token" class="logout-button" @click="showLogoutConfirm = true">
+    <Icon icon="tabler:logout" class="logout-icon" />
+  </button>
+
+  <div v-if="showLogoutConfirm" class="logout-overlay" @click.self="showLogoutConfirm = false" @pointerdown.stop @pointerup.stop @touchstart.stop @touchend.stop @mousedown.stop @mouseup.stop>
+    <div class="logout-dialog">
+      <p>確定要登出嗎？</p>
+      <p class="logout-sub">Are you sure you want to logout?</p>
+      <div class="logout-actions">
+        <button class="logout-cancel" @click="showLogoutConfirm = false">取消</button>
+        <button class="logout-confirm" @click="confirmLogout">登出</button>
+      </div>
+    </div>
+  </div>
 
   <div class="bottom-bar">
     <button class="button button-booths" @click="goToBoothsList">
@@ -118,4 +141,88 @@ provide('token', token)
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
+.logout-button {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.logout-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.logout-dialog {
+  background: white;
+  border-radius: 16px;
+  padding: 24px 28px;
+  text-align: center;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+.logout-dialog p {
+  margin: 0;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #333;
+}
+
+.logout-sub {
+  font-size: 0.9em !important;
+  font-weight: normal !important;
+  color: #888 !important;
+  margin-top: 4px !important;
+}
+
+.logout-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: center;
+}
+
+.logout-cancel,
+.logout-confirm {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 20px;
+  font-size: 1em;
+  cursor: pointer;
+}
+
+.logout-cancel {
+  background: #eee;
+  color: #333;
+}
+
+.logout-confirm {
+  background: #ff5f5f;
+  color: white;
+}
 </style>
